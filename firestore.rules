@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == 'josegregoriourdanetaguadama@gmail.com';
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isSuperAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().rol == role);
+    }
+
+    function isAdmin() {
+      return isSuperAdmin() || hasRole('admin');
+    }
+
+    function isSupport() {
+      return isAdmin() || hasRole('soporte');
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin() || isSupport());
+      allow list: if isAdmin() || isSupport();
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Suppliers collection
+    match /suppliers/{supplierId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin() || hasRole('proveedor');
+    }
+
+    // Products collection
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin() || hasRole('proveedor');
+      allow update, delete: if isAdmin() || hasRole('proveedor');
+    }
+
+    // Saved products collection (bookmarked by sellers)
+    match /saved_products/{savedId} {
+      allow read: if isSignedIn() && (resource.data.vendedor_id == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.vendedor_id == request.auth.uid;
+      allow update, delete: if isSignedIn() && (resource.data.vendedor_id == request.auth.uid || isAdmin());
+    }
+
+    // Orders collection
+    match /orders/{orderId} {
+      // Sellers can view their own orders; Suppliers can view assigned orders; Admin & Support can view all
+      allow get: if isSignedIn() && (
+        resource.data.vendedor_id == request.auth.uid || 
+        resource.data.proveedor_id == request.auth.uid || 
+        isAdmin() || 
+        isSupport()
+      );
+      
+      allow list: if isSignedIn();
+
+      allow create: if isSignedIn() && (
+        request.resource.data.vendedor_id == request.auth.uid || 
+        isAdmin()
+      );
+
+      // Updates: Sellers can edit before dispatch, suppliers can update status/shipping, admins/support can manage
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        isSupport() || 
+        resource.data.vendedor_id == request.auth.uid || 
+        resource.data.proveedor_id == request.auth.uid
+      );
+
+      allow delete: if isAdmin();
+
+      // Subcollection: order history
+      match /history/{historyId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+      }
+    }
+
+    // Incidents collection
+    match /incidents/{incidentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (isAdmin() || isSupport());
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "NexoDrop Colombia",
+  "description": "Plataforma integral de dropshipping para Colombia con catálogo de proveedores, cálculo de márgenes en COP, gestión de pedidos, novedades y asistente publicitario Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

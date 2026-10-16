@@ -1,0 +1,176 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access for sellers, suppliers, admins, and support",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "correo": { "type": "string" },
+        "telefono": { "type": "string" },
+        "rol": { "type": "string", "enum": ["admin", "vendedor", "proveedor", "soporte"] },
+        "nombre_negocio": { "type": "string" },
+        "estado": { "type": "string", "enum": ["activo", "inactivo"] },
+        "fecha_creacion": { "type": "string" }
+      },
+      "required": ["id", "nombre", "correo", "rol", "estado"]
+    },
+    "Supplier": {
+      "title": "Supplier",
+      "description": "Supplier information in Colombia",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre_comercial": { "type": "string" },
+        "contacto": { "type": "string" },
+        "correo": { "type": "string" },
+        "telefono": { "type": "string" },
+        "ciudad": { "type": "string" },
+        "tiempo_despacho_horas": { "type": "number" },
+        "calificacion": { "type": "number" },
+        "estado": { "type": "string", "enum": ["activo", "pendiente", "inactivo"] },
+        "fecha_creacion": { "type": "string" }
+      },
+      "required": ["id", "nombre_comercial", "correo", "estado"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Dropshipping product catalog items with supplier pricing and variants",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "proveedor_id": { "type": "string" },
+        "proveedor_nombre": { "type": "string" },
+        "nombre": { "type": "string" },
+        "descripcion": { "type": "string" },
+        "categoria": { "type": "string" },
+        "imagenes": { "type": "array" },
+        "costo_proveedor": { "type": "number" },
+        "precio_sugerido": { "type": "number" },
+        "inventario_disponible": { "type": "number" },
+        "variantes": { "type": "array" },
+        "tiempo_despacho_estimado": { "type": "string" },
+        "garantia_meses": { "type": "number" },
+        "estado": { "type": "string", "enum": ["activo", "pausado", "agotado"] },
+        "ultima_actualizacion_inventario": { "type": "string" },
+        "fecha_creacion": { "type": "string" }
+      },
+      "required": ["id", "proveedor_id", "nombre", "categoria", "costo_proveedor", "inventario_disponible", "estado"]
+    },
+    "SavedProduct": {
+      "title": "SavedProduct",
+      "description": "Products bookmarked by sellers with personalized selling price and projected margins",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "vendedor_id": { "type": "string" },
+        "producto_id": { "type": "string" },
+        "precio_venta": { "type": "number" },
+        "margen_estimado": { "type": "number" },
+        "notas": { "type": "string" },
+        "fecha_guardado": { "type": "string" }
+      },
+      "required": ["id", "vendedor_id", "producto_id", "precio_venta"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Dropshipping customer orders with complete delivery and fulfillment workflow",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "numero_orden": { "type": "string" },
+        "vendedor_id": { "type": "string" },
+        "vendedor_nombre": { "type": "string" },
+        "proveedor_id": { "type": "string" },
+        "proveedor_nombre": { "type": "string" },
+        "producto_id": { "type": "string" },
+        "producto_nombre": { "type": "string" },
+        "variante": { "type": "string" },
+        "cantidad": { "type": "number" },
+        "cliente_nombre": { "type": "string" },
+        "cliente_telefono": { "type": "string" },
+        "departamento": { "type": "string" },
+        "ciudad_entrega": { "type": "string" },
+        "direccion_entrega": { "type": "string" },
+        "precio_cobrado": { "type": "number" },
+        "costo_producto": { "type": "number" },
+        "costo_envio": { "type": "number" },
+        "comision_plataforma": { "type": "number" },
+        "ganancia_estimada": { "type": "number" },
+        "metodo_pago": { "type": "string" },
+        "estado": { "type": "string", "enum": ["pendiente_confirmacion", "confirmado", "en_preparacion", "despachado", "en_transito", "entregado", "novedad", "cancelado", "devuelto"] },
+        "transportadora": { "type": "string" },
+        "numero_guia": { "type": "string" },
+        "url_seguimiento": { "type": "string" },
+        "notas": { "type": "string" },
+        "fecha_creacion": { "type": "string" },
+        "fecha_actualizacion": { "type": "string" }
+      },
+      "required": ["id", "numero_orden", "vendedor_id", "proveedor_id", "producto_id", "cantidad", "cliente_nombre", "cliente_telefono", "direccion_entrega", "precio_cobrado", "estado"]
+    },
+    "OrderHistory": {
+      "title": "OrderHistory",
+      "description": "Audit trail log for order status mutations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "pedido_id": { "type": "string" },
+        "estado_anterior": { "type": "string" },
+        "estado_nuevo": { "type": "string" },
+        "usuario_id": { "type": "string" },
+        "usuario_nombre": { "type": "string" },
+        "nota": { "type": "string" },
+        "fecha": { "type": "string" }
+      },
+      "required": ["id", "pedido_id", "estado_anterior", "estado_nuevo", "usuario_id", "fecha"]
+    },
+    "Incident": {
+      "title": "Incident",
+      "description": "Delivery exceptions and support tickets related to orders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "pedido_id": { "type": "string" },
+        "tipo": { "type": "string" },
+        "descripcion": { "type": "string" },
+        "estado": { "type": "string", "enum": ["abierta", "en_revision", "resuelta"] },
+        "reportado_por": { "type": "string" },
+        "solucion": { "type": "string" },
+        "fecha_creacion": { "type": "string" },
+        "fecha_resolucion": { "type": "string" }
+      },
+      "required": ["id", "pedido_id", "tipo", "descripcion", "estado"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profiles with role attributes"
+    },
+    "/suppliers/{supplierId}": {
+      "schema": "Supplier",
+      "description": "Suppliers operating on the platform"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Products offered by suppliers for dropshipping"
+    },
+    "/saved_products/{savedId}": {
+      "schema": "SavedProduct",
+      "description": "Products saved by sellers with custom pricing"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Orders created by sellers and fulfilled by suppliers"
+    },
+    "/orders/{orderId}/history/{historyId}": {
+      "schema": "OrderHistory",
+      "description": "Audit log for transitions in order state"
+    },
+    "/incidents/{incidentId}": {
+      "schema": "Incident",
+      "description": "Incidents and novelty tracking on orders"
+    }
+  }
+}
